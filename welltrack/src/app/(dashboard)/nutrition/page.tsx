@@ -168,15 +168,15 @@ export default function NutritionPage() {
   const totalFat = nutrition.reduce((sum, n) => sum + (n.fat || 0), 0)
 
   if (loading) {
-    return <div className="flex h-64 items-center justify-center text-gray-500">Loading...</div>
+    return <div className="flex h-64 items-center justify-center text-sm text-slate-500">Loading...</div>
   }
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Nutrition</h1>
-          <p className="mt-1 text-sm text-gray-500">Track your meals and macros</p>
+          <h1 className="text-2xl font-semibold text-slate-900">Nutrition</h1>
+          <p className="mt-1 text-sm text-slate-500">Track your meals and macros</p>
         </div>
         <Button onClick={() => setShowForm(!showForm)}>
           {showForm ? 'Cancel' : '+ Log Meal'}
@@ -184,40 +184,36 @@ export default function NutritionPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-4">
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <p className="text-sm text-gray-500">Calories</p>
-          <p className="text-xl font-bold text-gray-900">{totalCalories}</p>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <p className="text-sm text-gray-500">Protein</p>
-          <p className="text-xl font-bold text-gray-900">{totalProtein.toFixed(1)}g</p>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <p className="text-sm text-gray-500">Carbs</p>
-          <p className="text-xl font-bold text-gray-900">{totalCarbs.toFixed(1)}g</p>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-4">
-          <p className="text-sm text-gray-500">Fat</p>
-          <p className="text-xl font-bold text-gray-900">{totalFat.toFixed(1)}g</p>
-        </div>
+        <MacroCard label="Calories" value={totalCalories} unit="kcal" color="orange" />
+        <MacroCard label="Protein" value={totalProtein} unit="g" decimals={1} color="blue" />
+        <MacroCard label="Carbs" value={totalCarbs} unit="g" decimals={1} color="cyan" />
+        <MacroCard label="Fat" value={totalFat} unit="g" decimals={1} color="amber" />
       </div>
 
       {showForm && (
-        <div className="rounded-lg border border-gray-200 bg-white p-6 space-y-4">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 space-y-4">
           <div className="flex gap-2">
             <button
               type="button"
               onClick={() => { setLogMode('manual'); setSelectedRecipe(null); setRecipeSearch(''); }}
-              className={`px-4 py-2 text-sm font-medium rounded-lg ${logMode === 'manual' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                logMode === 'manual'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
             >
               Manual Entry
             </button>
             <button
               type="button"
               onClick={() => setLogMode('recipe')}
-              className={`px-4 py-2 text-sm font-medium rounded-lg ${logMode === 'recipe' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                logMode === 'recipe'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
             >
-              🍳 From Recipe
+              From Recipe
             </button>
           </div>
 
@@ -228,42 +224,42 @@ export default function NutritionPage() {
                 placeholder="Search your recipes..."
                 value={recipeSearch}
                 onChange={(e) => setRecipeSearch(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
-              {searching && <p className="text-sm text-gray-400">Searching...</p>}
+              {searching && <p className="text-sm text-slate-400">Searching...</p>}
               {recipeResults.length > 0 && (
-                <div className="max-h-48 overflow-y-auto rounded-lg border border-gray-200">
+                <div className="max-h-48 overflow-y-auto rounded-lg border border-slate-200">
                   {recipeResults.map((recipe) => (
                     <button
                       key={recipe.id}
                       type="button"
                       onClick={() => handleRecipeSelect(recipe)}
-                      className="flex w-full items-center justify-between px-4 py-2 text-left text-sm hover:bg-gray-50 border-b border-gray-100 last:border-0"
+                      className="flex w-full items-center justify-between px-4 py-2 text-left text-sm hover:bg-slate-50 border-b border-slate-100 last:border-0"
                     >
                       <div>
-                        <span className="font-medium text-gray-900">{recipe.name}</span>
-                        <span className="ml-2 text-gray-400">
+                        <span className="font-medium text-slate-900">{recipe.name}</span>
+                        <span className="ml-2 text-slate-400">
                           ({recipe.ingredients.length} ingredients, {recipe.servings} servings)
                         </span>
                       </div>
-                      <span className="text-blue-600 text-xs">Select →</span>
+                      <span className="text-green-600 text-xs">Select</span>
                     </button>
                   ))}
                 </div>
               )}
               {recipeSearch && recipeResults.length === 0 && !searching && (
-                <p className="text-sm text-gray-500">No recipes found. <Link href="/recipes/new" className="text-blue-600 hover:underline">Create one</Link></p>
+                <p className="text-sm text-slate-500">No recipes found. <Link href="/recipes/new" className="text-green-600 hover:underline">Create one</Link></p>
               )}
               {selectedRecipe && (
-                <div className="rounded-lg bg-green-50 border border-green-200 p-3 flex items-center justify-between">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 flex items-center justify-between">
                   <div>
-                    <span className="font-medium text-green-800">Selected: {selectedRecipe.name}</span>
-                    <p className="text-xs text-green-600">Nutrition auto-filled</p>
+                    <span className="text-sm font-medium text-slate-900">Selected: {selectedRecipe.name}</span>
+                    <p className="text-xs text-slate-500">Nutrition auto-filled</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => { setSelectedRecipe(null); setFormData({ food: '', calories: '', protein: '', carbs: '', fat: '', portion: '' }); }}
-                    className="text-sm text-green-600 hover:underline"
+                    className="text-sm text-slate-500 hover:text-slate-800"
                   >
                     Change
                   </button>
@@ -327,36 +323,74 @@ export default function NutritionPage() {
       )}
 
       {nutrition.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-          <p className="text-gray-500">No meals logged yet. Start tracking your nutrition!</p>
+        <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
+          <p className="text-sm text-slate-500">No meals logged yet. Start tracking your nutrition!</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {nutrition.map((log) => (
-            <div
-              key={log.id}
-              className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4"
-            >
-              <div>
-                <h3 className="font-medium text-gray-900">{log.food}</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  {log.calories} cal
-                  {log.protein && ` • P: ${log.protein}g`}
-                  {log.carbs && ` • C: ${log.carbs}g`}
-                  {log.fat && ` • F: ${log.fat}g`}
-                  {log.portion && ` • ${log.portion}`}
-                </p>
-                <p className="text-xs text-gray-400">
-                  {new Date(log.createdAt).toLocaleDateString()}
-                </p>
+        <div className="rounded-xl border border-slate-200 bg-white">
+          <div className="px-6 py-4 border-b border-slate-200">
+            <h2 className="text-base font-semibold text-slate-900">Today&apos;s Meals</h2>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {nutrition.map((log) => (
+              <div
+                key={log.id}
+                className="flex items-center justify-between px-6 py-4"
+              >
+                <div>
+                  <h3 className="text-sm font-medium text-slate-900">{log.food}</h3>
+                  <p className="mt-0.5 text-sm text-slate-500">
+                    {log.calories} cal
+                    {log.protein !== null && log.protein > 0 && ` · P: ${log.protein}g`}
+                    {log.carbs !== null && log.carbs > 0 && ` · C: ${log.carbs}g`}
+                    {log.fat !== null && log.fat > 0 && ` · F: ${log.fat}g`}
+                    {log.portion && ` · ${log.portion}`}
+                  </p>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    {new Date(log.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <Button variant="destructive" size="sm" onClick={() => handleDelete(log.id)}>
+                  Delete
+                </Button>
               </div>
-              <Button variant="destructive" size="sm" onClick={() => handleDelete(log.id)}>
-                Delete
-              </Button>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function MacroCard({
+  label,
+  value,
+  unit,
+  decimals = 0,
+  color,
+}: {
+  label: string
+  value: number
+  unit: string
+  decimals?: number
+  color: 'orange' | 'blue' | 'cyan' | 'amber'
+}) {
+  const formatted = decimals > 0 ? value.toFixed(decimals) : value.toString()
+
+  const colors = {
+    orange: 'text-orange-600',
+    blue: 'text-blue-600',
+    cyan: 'text-cyan-600',
+    amber: 'text-amber-600',
+  }
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-5">
+      <p className="text-sm text-slate-500">{label}</p>
+      <p className={`mt-1 text-2xl font-semibold ${colors[color]}`}>
+        {formatted}
+        <span className="ml-0.5 text-sm font-normal text-slate-400">{unit}</span>
+      </p>
     </div>
   )
 }

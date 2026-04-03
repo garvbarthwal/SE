@@ -112,25 +112,24 @@ export default function AnalyzeFoodPage() {
   if (status === 'unauthenticated') return null
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">AI Food Analysis</h1>
-        <p className="mt-1 text-sm text-gray-500">Take a photo of your food to get instant nutrition data</p>
+        <h1 className="text-2xl font-semibold text-slate-900">AI Food Analysis</h1>
+        <p className="mt-1 text-sm text-slate-500">Upload a photo of your food to get nutrition data</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
-          <h2 className="text-lg font-semibold text-gray-900">Upload Food Photo</h2>
+        <div className="rounded-xl border border-slate-200 bg-white p-6">
+          <h2 className="text-base font-semibold text-slate-900">Upload Photo</h2>
 
           <div className="mt-4 space-y-4">
-            <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 p-8 hover:bg-gray-50">
+            <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 p-8 hover:bg-slate-50 transition-colors">
               {preview ? (
                 <img src={preview} alt="Food preview" className="max-h-64 rounded-lg" />
               ) : (
                 <div className="text-center">
-                  <span className="text-4xl">📷</span>
-                  <p className="mt-2 text-sm text-gray-500">Click to upload or drag and drop</p>
-                  <p className="text-xs text-gray-400">PNG, JPG up to 5MB</p>
+                  <p className="text-sm text-slate-500">Click to upload</p>
+                  <p className="text-xs text-slate-400 mt-1">PNG, JPG up to 5MB</p>
                 </div>
               )}
               <input
@@ -153,46 +152,45 @@ export default function AnalyzeFoodPage() {
           </div>
         </div>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
-          <h2 className="text-lg font-semibold text-gray-900">Results</h2>
+        <div className="rounded-xl border border-slate-200 bg-white p-6">
+          <h2 className="text-base font-semibold text-slate-900">Results</h2>
 
           {!result && !analyzing && (
-            <div className="mt-8 text-center text-gray-500">
-              <span className="text-4xl">🍽️</span>
-              <p className="mt-2">Upload a food photo to see results</p>
+            <div className="mt-8 text-center text-sm text-slate-500">
+              <p>Upload a food photo to see results</p>
             </div>
           )}
 
           {analyzing && (
             <div className="mt-8 text-center">
-              <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
-              <p className="mt-4 text-gray-500">Analyzing your food...</p>
+              <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-green-600 border-t-transparent" />
+              <p className="mt-3 text-sm text-slate-500">Analyzing your food...</p>
             </div>
           )}
 
           {result && (
             <div className="mt-4 space-y-4">
-              <div className="rounded-lg bg-gray-50 p-4">
-                <h3 className="text-xl font-bold text-gray-900">{result.food || 'Unknown'}</h3>
-                {result.portion && <p className="text-sm text-gray-500">{result.portion}</p>}
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <h3 className="text-sm font-medium text-slate-900">{result.food || 'Unknown'}</h3>
+                {result.portion && <p className="text-xs text-slate-500 mt-0.5">{result.portion}</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-lg bg-orange-50 p-3 text-center">
-                  <p className="text-2xl font-bold text-orange-600">{result.calories || 0}</p>
-                  <p className="text-xs text-gray-500">Calories</p>
+                <div className="rounded-lg border border-slate-200 bg-white p-4 text-center">
+                  <p className="text-xl font-semibold text-slate-900">{result.calories || 0}</p>
+                  <p className="text-xs text-slate-400">Calories</p>
                 </div>
-                <div className="rounded-lg bg-blue-50 p-3 text-center">
-                  <p className="text-2xl font-bold text-blue-600">{result.protein || 0}g</p>
-                  <p className="text-xs text-gray-500">Protein</p>
+                <div className="rounded-lg border border-slate-200 bg-white p-4 text-center">
+                  <p className="text-xl font-semibold text-slate-900">{result.protein || 0}g</p>
+                  <p className="text-xs text-slate-400">Protein</p>
                 </div>
-                <div className="rounded-lg bg-green-50 p-3 text-center">
-                  <p className="text-2xl font-bold text-green-600">{result.carbs || 0}g</p>
-                  <p className="text-xs text-gray-500">Carbs</p>
+                <div className="rounded-lg border border-slate-200 bg-white p-4 text-center">
+                  <p className="text-xl font-semibold text-slate-900">{result.carbs || 0}g</p>
+                  <p className="text-xs text-slate-400">Carbs</p>
                 </div>
-                <div className="rounded-lg bg-yellow-50 p-3 text-center">
-                  <p className="text-2xl font-bold text-yellow-600">{result.fat || 0}g</p>
-                  <p className="text-xs text-gray-500">Fat</p>
+                <div className="rounded-lg border border-slate-200 bg-white p-4 text-center">
+                  <p className="text-xl font-semibold text-slate-900">{result.fat || 0}g</p>
+                  <p className="text-xs text-slate-400">Fat</p>
                 </div>
               </div>
 
