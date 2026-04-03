@@ -92,15 +92,15 @@ export default function WorkoutsPage() {
   }
 
   if (loading) {
-    return <div className="flex h-64 items-center justify-center text-gray-500">Loading...</div>
+    return <div className="flex h-64 items-center justify-center text-sm text-slate-500">Loading...</div>
   }
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Workouts</h1>
-          <p className="mt-1 text-sm text-gray-500">Track your exercise sessions</p>
+          <h1 className="text-2xl font-semibold text-slate-900">Workouts</h1>
+          <p className="mt-1 text-sm text-slate-500">Track your exercise sessions</p>
         </div>
         <Button onClick={() => setShowForm(!showForm)}>
           {showForm ? 'Cancel' : '+ Log Workout'}
@@ -108,14 +108,14 @@ export default function WorkoutsPage() {
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="rounded-lg border border-gray-200 bg-white p-6 space-y-4">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Type</label>
+              <label className="block text-sm font-medium text-slate-700">Type</label>
               <select
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
               >
                 <option value="strength">Strength</option>
                 <option value="cardio">Cardio</option>
@@ -148,53 +148,58 @@ export default function WorkoutsPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Notes</label>
+            <label className="block text-sm font-medium text-slate-700">Notes</label>
             <textarea
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               placeholder="How did it go?"
               rows={2}
-              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
           </div>
           <Button type="submit" disabled={submitting}>
             {submitting ? 'Saving...' : 'Save Workout'}
           </Button>
-        </form>
+        </div>
       )}
 
       {workouts.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-          <p className="text-gray-500">No workouts logged yet. Start tracking your fitness journey!</p>
+        <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
+          <p className="text-sm text-slate-500">No workouts logged yet. Start tracking your fitness journey!</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {workouts.map((workout) => (
-            <div
-              key={workout.id}
-              className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4"
-            >
-              <div>
-                <div className="flex items-center gap-3">
-                  <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
-                    {workout.type}
-                  </span>
-                  <h3 className="font-medium text-gray-900">{workout.name}</h3>
+        <div className="rounded-xl border border-slate-200 bg-white">
+          <div className="px-6 py-4 border-b border-slate-200">
+            <h2 className="text-base font-semibold text-slate-900">Recent Workouts</h2>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {workouts.map((workout) => (
+              <div
+                key={workout.id}
+                className="flex items-center justify-between px-6 py-4"
+              >
+                <div>
+                  <div className="flex items-center gap-3">
+                    <span className="rounded-md bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 capitalize">
+                      {workout.type}
+                    </span>
+                    <h3 className="text-sm font-medium text-slate-900">{workout.name}</h3>
+                  </div>
+                  <p className="mt-0.5 text-sm text-slate-500">
+                    {workout.duration} min
+                    {workout.calories && ` · ${workout.calories} cal`}
+                    {workout.notes && ` · ${workout.notes}`}
+                  </p>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    {new Date(workout.createdAt).toLocaleDateString()}
+                  </p>
                 </div>
-                <p className="mt-1 text-sm text-gray-500">
-                  {workout.duration} min
-                  {workout.calories && ` • ${workout.calories} cal`}
-                  {workout.notes && ` • ${workout.notes}`}
-                </p>
-                <p className="text-xs text-gray-400">
-                  {new Date(workout.createdAt).toLocaleDateString()}
-                </p>
+                <Button variant="destructive" size="sm" onClick={() => handleDelete(workout.id)}>
+                  Delete
+                </Button>
               </div>
-              <Button variant="destructive" size="sm" onClick={() => handleDelete(workout.id)}>
-                Delete
-              </Button>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </div>

@@ -69,11 +69,11 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
   }
 
   if (loading) {
-    return <div className="flex h-64 items-center justify-center text-gray-500">Loading...</div>
+    return <div className="flex h-64 items-center justify-center text-sm text-slate-500">Loading...</div>
   }
 
   if (!recipe) {
-    return <div className="text-center text-gray-500">Recipe not found</div>
+    return <div className="text-center text-slate-500">Recipe not found</div>
   }
 
   let totalCalories = 0
@@ -90,7 +90,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
   })
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={() => router.push('/recipes')}>
           ← Back to Recipes
@@ -98,36 +98,38 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
         <Button variant="destructive" onClick={handleDelete}>Delete Recipe</Button>
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-white p-6 space-y-4">
+      <div className="rounded-xl border border-slate-200 bg-white p-6 space-y-4">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-gray-900">{recipe.name}</h1>
+          <h1 className="text-xl font-semibold text-slate-900">{recipe.name}</h1>
           {recipe.isPublic && (
-            <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+            <span className="rounded-md bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">
               Public
             </span>
           )}
         </div>
 
         {recipe.description && (
-          <p className="text-gray-600">{recipe.description}</p>
+          <p className="text-sm text-slate-500">{recipe.description}</p>
         )}
 
-        <div className="flex gap-4 text-sm text-gray-500">
+        <div className="flex gap-4 text-sm text-slate-400">
           <span>{recipe.servings} serving{recipe.servings > 1 ? 's' : ''}</span>
           <span>{recipe.ingredients.length} ingredient{recipe.ingredients.length !== 1 ? 's' : ''}</span>
         </div>
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <h2 className="text-lg font-semibold text-gray-900">Ingredients</h2>
-        <div className="mt-4 space-y-2">
+      <div className="rounded-xl border border-slate-200 bg-white">
+        <div className="px-6 py-4 border-b border-slate-200">
+          <h2 className="text-base font-semibold text-slate-900">Ingredients</h2>
+        </div>
+        <div className="divide-y divide-slate-100">
           {recipe.ingredients.map((ing) => (
             <div
               key={ing.id}
-              className="flex items-center justify-between rounded-lg border border-gray-100 p-3"
+              className="flex items-center justify-between px-6 py-4"
             >
-              <span className="font-medium text-gray-900">{ing.food.name}</span>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm font-medium text-slate-900">{ing.food.name}</span>
+              <span className="text-sm text-slate-500">
                 {ing.quantity} {ing.unit}
               </span>
             </div>
@@ -135,29 +137,29 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ id: str
         </div>
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <h2 className="text-lg font-semibold text-gray-900">Nutrition</h2>
-        <div className="mt-4 grid grid-cols-4 gap-4">
-          <div className="rounded-lg bg-orange-50 p-3 text-center">
-            <p className="text-2xl font-bold text-orange-600">{Math.round(totalCalories)}</p>
-            <p className="text-xs text-gray-500">Calories</p>
+      <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <h2 className="text-base font-semibold text-slate-900">Nutrition</h2>
+        <div className="mt-4 grid grid-cols-4 gap-3">
+          <div className="rounded-lg border border-slate-200 bg-white p-4 text-center">
+            <p className="text-xl font-semibold text-slate-900">{Math.round(totalCalories)}</p>
+            <p className="text-xs text-slate-400">Calories</p>
           </div>
-          <div className="rounded-lg bg-blue-50 p-3 text-center">
-            <p className="text-2xl font-bold text-blue-600">{totalProtein.toFixed(1)}g</p>
-            <p className="text-xs text-gray-500">Protein</p>
+          <div className="rounded-lg border border-slate-200 bg-white p-4 text-center">
+            <p className="text-xl font-semibold text-slate-900">{totalProtein.toFixed(1)}g</p>
+            <p className="text-xs text-slate-400">Protein</p>
           </div>
-          <div className="rounded-lg bg-green-50 p-3 text-center">
-            <p className="text-2xl font-bold text-green-600">{totalCarbs.toFixed(1)}g</p>
-            <p className="text-xs text-gray-500">Carbs</p>
+          <div className="rounded-lg border border-slate-200 bg-white p-4 text-center">
+            <p className="text-xl font-semibold text-slate-900">{totalCarbs.toFixed(1)}g</p>
+            <p className="text-xs text-slate-400">Carbs</p>
           </div>
-          <div className="rounded-lg bg-yellow-50 p-3 text-center">
-            <p className="text-2xl font-bold text-yellow-600">{totalFat.toFixed(1)}g</p>
-            <p className="text-xs text-gray-500">Fat</p>
+          <div className="rounded-lg border border-slate-200 bg-white p-4 text-center">
+            <p className="text-xl font-semibold text-slate-900">{totalFat.toFixed(1)}g</p>
+            <p className="text-xs text-slate-400">Fat</p>
           </div>
         </div>
         {recipe.servings > 1 && (
-          <p className="mt-3 text-sm text-gray-500">
-            Per serving: {Math.round(totalCalories / recipe.servings)} cal • P: {(totalProtein / recipe.servings).toFixed(1)}g • C: {(totalCarbs / recipe.servings).toFixed(1)}g • F: {(totalFat / recipe.servings).toFixed(1)}g
+          <p className="mt-3 text-sm text-slate-500">
+            Per serving: {Math.round(totalCalories / recipe.servings)} cal · P: {(totalProtein / recipe.servings).toFixed(1)}g · C: {(totalCarbs / recipe.servings).toFixed(1)}g · F: {(totalFat / recipe.servings).toFixed(1)}g
           </p>
         )}
       </div>

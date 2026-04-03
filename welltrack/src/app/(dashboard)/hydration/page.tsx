@@ -84,48 +84,71 @@ export default function HydrationPage() {
   }
 
   const progressPercent = Math.min((totalAmount / DAILY_GOAL) * 100, 100)
+  const radius = 80
+  const circumference = Math.PI * radius
+  const strokeDashoffset = circumference - (progressPercent / 100) * circumference
 
   if (loading) {
-    return <div className="flex h-64 items-center justify-center text-gray-500">Loading...</div>
+    return <div className="flex h-64 items-center justify-center text-sm text-slate-500">Loading...</div>
   }
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Hydration</h1>
-        <p className="mt-1 text-sm text-gray-500">Track your daily water intake</p>
+        <h1 className="text-2xl font-semibold text-slate-900">Hydration</h1>
+        <p className="mt-1 text-sm text-slate-500">Track your daily water intake</p>
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-gray-500">Daily Progress</p>
-            <p className="text-3xl font-bold text-gray-900">
-              {totalAmount}ml / {DAILY_GOAL}ml
-            </p>
+      <div className="rounded-xl border border-slate-200 bg-white p-8">
+        <div className="flex flex-col items-center">
+          <div className="relative w-48 h-24 overflow-hidden">
+            <svg className="w-48 h-48" viewBox="0 0 200 200">
+              <circle
+                cx="100"
+                cy="100"
+                r={radius}
+                fill="none"
+                stroke="#e2e8f0"
+                strokeWidth="12"
+                strokeLinecap="round"
+                strokeDasharray={circumference}
+                strokeDashoffset={0}
+                transform="rotate(180 100 100)"
+              />
+              <circle
+                cx="100"
+                cy="100"
+                r={radius}
+                fill="none"
+                stroke="#22c55e"
+                strokeWidth="12"
+                strokeLinecap="round"
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeDashoffset}
+                transform="rotate(180 100 100)"
+                className="transition-all duration-500"
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center pt-8">
+              <span className="text-3xl font-semibold text-slate-900">{totalAmount}</span>
+              <span className="text-sm text-slate-500">/ {DAILY_GOAL}ml</span>
+            </div>
           </div>
-          <div className="text-4xl">💧</div>
+          <p className="mt-4 text-sm text-slate-500">
+            {progressPercent >= 100
+              ? 'Daily goal reached!'
+              : `${DAILY_GOAL - totalAmount}ml remaining`}
+          </p>
         </div>
-        <div className="mt-4 h-3 w-full rounded-full bg-gray-200">
-          <div
-            className="h-3 rounded-full bg-cyan-500 transition-all"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-        <p className="mt-2 text-sm text-gray-500">
-          {progressPercent >= 100
-            ? '🎉 Goal reached!'
-            : `${DAILY_GOAL - totalAmount}ml remaining`}
-        </p>
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <h2 className="text-lg font-semibold text-gray-900">Quick Add</h2>
-        <div className="mt-4 flex flex-wrap gap-3">
+      <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <h2 className="text-base font-semibold text-slate-900">Quick Add</h2>
+        <div className="mt-4 flex flex-wrap gap-2">
           {QUICK_AMOUNTS.map((amount) => (
             <Button
               key={amount}
-              variant="secondary"
+              variant="outline"
               onClick={() => addWater(amount)}
               disabled={submitting}
             >
@@ -133,13 +156,13 @@ export default function HydrationPage() {
             </Button>
           ))}
         </div>
-        <form onSubmit={handleCustomAmount} className="mt-4 flex gap-3">
+        <form onSubmit={handleCustomAmount} className="mt-4 flex gap-2">
           <input
             type="number"
             placeholder="Custom amount (ml)"
             value={customAmount}
             onChange={(e) => setCustomAmount(e.target.value)}
-            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
           />
           <Button type="submit" disabled={submitting}>
             Add
@@ -148,25 +171,28 @@ export default function HydrationPage() {
       </div>
 
       {hydration.length > 0 && (
-        <div className="space-y-2">
-          <h2 className="text-lg font-semibold text-gray-900">Today&apos;s Logs</h2>
-          {hydration.map((log) => (
-            <div
-              key={log.id}
-              className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-cyan-600">💧</span>
-                <span className="font-medium text-gray-900">{log.amount}ml</span>
-                <span className="text-sm text-gray-400">
-                  {new Date(log.createdAt).toLocaleTimeString()}
-                </span>
+        <div className="rounded-xl border border-slate-200 bg-white">
+          <div className="px-6 py-4 border-b border-slate-200">
+            <h2 className="text-base font-semibold text-slate-900">Today&apos;s Logs</h2>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {hydration.map((log) => (
+              <div
+                key={log.id}
+                className="flex items-center justify-between px-6 py-4"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-slate-900">{log.amount}ml</span>
+                  <span className="text-sm text-slate-400">
+                    {new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+                <Button variant="destructive" size="sm" onClick={() => handleDelete(log.id)}>
+                  Delete
+                </Button>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => handleDelete(log.id)}>
-                ✕
-              </Button>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </div>

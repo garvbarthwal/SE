@@ -80,63 +80,88 @@ export default function GoalDetailPage({ params }: { params: Promise<{ id: strin
   }
 
   if (loading) {
-    return <div className="flex h-64 items-center justify-center text-gray-500">Loading...</div>
+    return <div className="flex h-64 items-center justify-center text-sm text-slate-500">Loading...</div>
   }
 
   if (!goal) {
-    return <div className="text-center text-gray-500">Goal not found</div>
+    return <div className="text-center text-slate-500">Goal not found</div>
   }
 
   const progress = goal.targetValue > 0 ? Math.min((goal.currentValue / goal.targetValue) * 100, 100) : 0
+  const radius = 80
+  const circumference = Math.PI * radius
+  const strokeDashoffset = circumference - (progress / 100) * circumference
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       <div>
         <Button variant="ghost" onClick={() => router.push('/goals')}>
           ← Back to Goals
         </Button>
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-white p-6 space-y-4">
-        <h1 className="text-2xl font-bold text-gray-900">{goal.title}</h1>
-
-        <div className="grid gap-4 sm:grid-cols-3">
-          <div className="rounded-lg bg-gray-50 p-4">
-            <p className="text-sm text-gray-500">Type</p>
-            <p className="text-lg font-semibold capitalize">{goal.type}</p>
-          </div>
-          <div className="rounded-lg bg-gray-50 p-4">
-            <p className="text-sm text-gray-500">Target</p>
-            <p className="text-lg font-semibold">{goal.targetValue}</p>
-          </div>
-          <div className="rounded-lg bg-gray-50 p-4">
-            <p className="text-sm text-gray-500">Current</p>
-            <p className="text-lg font-semibold">{goal.currentValue}</p>
+      <div className="rounded-xl border border-slate-200 bg-white p-6 space-y-4">
+        <div className="flex flex-col items-center">
+          <div className="relative w-48 h-24 overflow-hidden">
+            <svg className="w-48 h-48" viewBox="0 0 200 200">
+              <circle
+                cx="100"
+                cy="100"
+                r={radius}
+                fill="none"
+                stroke="#e2e8f0"
+                strokeWidth="12"
+                strokeLinecap="round"
+                strokeDasharray={circumference}
+                strokeDashoffset={0}
+                transform="rotate(180 100 100)"
+              />
+              <circle
+                cx="100"
+                cy="100"
+                r={radius}
+                fill="none"
+                stroke="#22c55e"
+                strokeWidth="12"
+                strokeLinecap="round"
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeDashoffset}
+                transform="rotate(180 100 100)"
+                className="transition-all duration-500"
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center pt-8">
+              <span className="text-3xl font-semibold text-slate-900">{Math.round(progress)}%</span>
+            </div>
           </div>
         </div>
 
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-500">Progress</span>
-            <span className="font-medium">{Math.round(progress)}%</span>
+        <h1 className="text-xl font-semibold text-slate-900 text-center">{goal.title}</h1>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-center">
+            <p className="text-sm text-slate-500">Type</p>
+            <p className="text-lg font-semibold capitalize text-slate-900">{goal.type}</p>
           </div>
-          <div className="h-3 w-full rounded-full bg-gray-200">
-            <div
-              className="h-3 rounded-full bg-blue-600 transition-all"
-              style={{ width: `${progress}%` }}
-            />
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-center">
+            <p className="text-sm text-slate-500">Target</p>
+            <p className="text-lg font-semibold text-slate-900">{goal.targetValue}</p>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-center">
+            <p className="text-sm text-slate-500">Current</p>
+            <p className="text-lg font-semibold text-slate-900">{goal.currentValue}</p>
           </div>
         </div>
 
         {goal.deadline && (
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-slate-400">
             Deadline: {new Date(goal.deadline).toLocaleDateString()}
           </p>
         )}
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <h2 className="text-lg font-semibold text-gray-900">Log Progress</h2>
+      <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <h2 className="text-base font-semibold text-slate-900">Log Progress</h2>
         <form onSubmit={handleProgressSubmit} className="mt-4 space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <Input
@@ -161,19 +186,21 @@ export default function GoalDetailPage({ params }: { params: Promise<{ id: strin
       </div>
 
       {goal.progress.length > 0 && (
-        <div className="rounded-lg border border-gray-200 bg-white p-6">
-          <h2 className="text-lg font-semibold text-gray-900">Progress History</h2>
-          <div className="mt-4 space-y-2">
+        <div className="rounded-xl border border-slate-200 bg-white">
+          <div className="px-6 py-4 border-b border-slate-200">
+            <h2 className="text-base font-semibold text-slate-900">Progress History</h2>
+          </div>
+          <div className="divide-y divide-slate-100">
             {goal.progress.map((p) => (
               <div
                 key={p.id}
-                className="flex items-center justify-between rounded-lg border border-gray-100 p-3"
+                className="flex items-center justify-between px-6 py-4"
               >
                 <div>
-                  <span className="font-medium text-gray-900">{p.value}</span>
-                  {p.notes && <span className="ml-2 text-sm text-gray-500">{p.notes}</span>}
+                  <span className="text-sm font-medium text-slate-900">{p.value}</span>
+                  {p.notes && <span className="ml-2 text-sm text-slate-500">{p.notes}</span>}
                 </div>
-                <span className="text-sm text-gray-400">
+                <span className="text-sm text-slate-400">
                   {new Date(p.loggedAt).toLocaleDateString()}
                 </span>
               </div>

@@ -49,87 +49,60 @@ export default function RecommendationsPage() {
     }
   }
 
-  const typeIcons: Record<string, string> = {
-    nutrition: '🍎',
-    workout: '💪',
-    hydration: '💧',
-    general: '🎯',
-  }
-
-  const typeColors: Record<string, string> = {
-    nutrition: 'bg-green-100 text-green-700',
-    workout: 'bg-blue-100 text-blue-700',
-    hydration: 'bg-cyan-100 text-cyan-700',
-    general: 'bg-purple-100 text-purple-700',
-  }
-
-  const insightColors: Record<string, string> = {
-    positive: 'border-green-200 bg-green-50',
-    warning: 'border-yellow-200 bg-yellow-50',
-    neutral: 'border-gray-200 bg-gray-50',
-  }
-
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
         <div className="text-center">
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
-          <p className="mt-4 text-gray-500">Generating personalized insights...</p>
+          <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-green-600 border-t-transparent" />
+          <p className="mt-3 text-sm text-slate-500">Generating personalized insights...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">AI Recommendations</h1>
-          <p className="mt-1 text-sm text-gray-500">Personalized suggestions based on your weekly data</p>
+          <h1 className="text-2xl font-semibold text-slate-900">AI Recommendations</h1>
+          <p className="mt-1 text-sm text-slate-500">Personalized suggestions based on your weekly data</p>
         </div>
-        <Button onClick={fetchRecommendations} variant="secondary">
+        <Button onClick={fetchRecommendations} variant="outline">
           Refresh
         </Button>
       </div>
 
       {error && (
-        <div className="rounded-lg bg-red-50 p-4 text-sm text-red-600">{error}</div>
-      )}
-
-      {recommendations.length > 0 && (
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900">Recommendations</h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {recommendations.map((rec, i) => (
-              <div
-                key={i}
-                className="rounded-lg border border-gray-200 bg-white p-5 space-y-3"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">{typeIcons[rec.type] || '💡'}</span>
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${typeColors[rec.type] || 'bg-gray-100 text-gray-700'}`}>
-                    {rec.type}
-                  </span>
-                </div>
-                <h3 className="font-semibold text-gray-900">{rec.title}</h3>
-                <p className="text-sm text-gray-600">{rec.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">{error}</div>
       )}
 
       {insights.length > 0 && (
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900">Insights</h2>
-          <div className="mt-4 space-y-3">
-            {insights.map((insight, i) => (
+        <div className="rounded-xl border border-slate-200 bg-white p-6 space-y-3">
+          <h2 className="text-base font-semibold text-slate-900">Insights</h2>
+          {insights.map((insight, i) => (
+            <div
+              key={i}
+              className="rounded-lg border border-slate-200 bg-slate-50 p-4"
+            >
+              <h3 className="text-sm font-medium text-slate-900">{insight.title}</h3>
+              <p className="mt-1 text-sm text-slate-500">{insight.description}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {recommendations.length > 0 && (
+        <div className="rounded-xl border border-slate-200 bg-white p-6">
+          <h2 className="text-base font-semibold text-slate-900">Recommendations</h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {recommendations.map((rec, i) => (
               <div
                 key={i}
-                className={`rounded-lg border p-4 ${insightColors[insight.type] || 'border-gray-200 bg-gray-50'}`}
+                className="rounded-lg border border-slate-200 bg-slate-50 p-4 space-y-2"
               >
-                <h3 className="font-medium text-gray-900">{insight.title}</h3>
-                <p className="mt-1 text-sm text-gray-600">{insight.description}</p>
+                <span className="text-xs font-medium capitalize text-slate-400">{rec.type}</span>
+                <h3 className="text-sm font-medium text-slate-900">{rec.title}</h3>
+                <p className="text-sm text-slate-500">{rec.description}</p>
               </div>
             ))}
           </div>
@@ -137,9 +110,8 @@ export default function RecommendationsPage() {
       )}
 
       {recommendations.length === 0 && insights.length === 0 && !error && (
-        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-          <span className="text-4xl">🤖</span>
-          <p className="mt-2 text-gray-500">No recommendations yet. Start logging data to get personalized insights!</p>
+        <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
+          <p className="text-sm text-slate-500">No recommendations yet. Start logging data to get personalized insights!</p>
         </div>
       )}
     </div>
