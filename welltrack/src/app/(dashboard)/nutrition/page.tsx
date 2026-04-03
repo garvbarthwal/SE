@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import Link from 'next/link'
 
 interface NutritionLog {
   id: string
@@ -251,7 +252,7 @@ export default function NutritionPage() {
                 </div>
               )}
               {recipeSearch && recipeResults.length === 0 && !searching && (
-                <p className="text-sm text-gray-500">No recipes found. <a href="/recipes/new" className="text-blue-600 hover:underline">Create one</a></p>
+                <p className="text-sm text-gray-500">No recipes found. <Link href="/recipes/new" className="text-blue-600 hover:underline">Create one</Link></p>
               )}
               {selectedRecipe && (
                 <div className="rounded-lg bg-green-50 border border-green-200 p-3 flex items-center justify-between">
