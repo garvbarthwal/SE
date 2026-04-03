@@ -9,6 +9,7 @@ const navItems = [
   { href: '/nutrition', label: 'Nutrition', icon: '🍎' },
   { href: '/hydration', label: 'Hydration', icon: '💧' },
   { href: '/goals', label: 'Goals', icon: '🎯' },
+  { href: '/recipes', label: 'Recipes', icon: '🍳' },
   { href: '/analyze-food', label: 'AI Food', icon: '📷' },
   { href: '/recommendations', label: 'AI Insights', icon: '🤖' },
   { href: '/analytics', label: 'Analytics', icon: '📈' },

@@ -53,3 +53,30 @@ export const userPreferenceSchema = z.object({
   dietType: z.string().optional(),
   restrictions: z.array(z.string()).optional(),
 })
+
+export const foodSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  brand: z.string().optional(),
+  source: z.enum(['system', 'user', 'usda']).default('user'),
+  calories: z.number().min(0, 'Calories must be positive'),
+  protein: z.number().optional(),
+  carbs: z.number().optional(),
+  fat: z.number().optional(),
+  fiber: z.number().optional(),
+  servingSize: z.number().optional(),
+  defaultUnit: z.string().default('g'),
+})
+
+export const recipeSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(100),
+  description: z.string().optional(),
+  servings: z.number().min(1, 'At least 1 serving').default(1),
+  isPublic: z.boolean().default(false),
+})
+
+export const recipeIngredientSchema = z.object({
+  foodId: z.string().min(1, 'Food is required'),
+  quantity: z.number().min(0.01, 'Quantity must be positive'),
+  unit: z.enum(['g', 'kg', 'oz', 'lb', 'cup', 'tbsp', 'tsp', 'ml']),
+  notes: z.string().optional(),
+})

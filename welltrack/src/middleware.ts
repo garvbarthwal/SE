@@ -11,6 +11,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/nutrition') ||
     pathname.startsWith('/hydration') ||
     pathname.startsWith('/goals') ||
+    pathname.startsWith('/recipes') ||
     pathname.startsWith('/analyze-food') ||
     pathname.startsWith('/recommendations') ||
     pathname.startsWith('/analytics')
@@ -33,6 +34,7 @@ export const config = {
     '/nutrition/:path*',
     '/hydration/:path*',
     '/goals/:path*',
+    '/recipes/:path*',
     '/analyze-food/:path*',
     '/recommendations/:path*',
     '/analytics/:path*',

@@ -22,6 +22,8 @@ model User {
   foodImages   FoodImage[]
   preferences  UserPreference?
   aiCache      AICache[]
+  foods        Food[]
+  recipes      Recipe[]
 }
 
 model Workout {
@@ -126,4 +128,53 @@ model AICache {
 
   @@unique([userId, key])
   @@index([userId, expiresAt])
+}
+
+model Food {
+  id              String             @id @default(cuid())
+  name            String
+  brand           String?
+  source          String             // system, user, usda
+  barcode         String?
+  calories        Float              // per 100g
+  protein         Float?
+  carbs           Float?
+  fat             Float?
+  fiber           Float?
+  servingSize     Float?             // default serving in grams
+  defaultUnit     String?            // g, oz, kg, cup, etc.
+  createdAt       DateTime           @default(now())
+  createdBy       String?
+  creator         User?              @relation(fields: [createdBy], references: [id], onDelete: SetNull)
+  recipeIngredients RecipeIngredient[]
+
+  @@index([name])
+  @@index([source])
+}
+
+model Recipe {
+  id          String             @id @default(cuid())
+  userId      String
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  servings    Int                @default(1)
+  isPublic    Boolean            @default(false)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  ingredients RecipeIngredient[]
+
+  @@index([userId])
+  @@index([name])
+}
+
+model RecipeIngredient {
+  id        String   @id @default(cuid())
+  recipeId  String
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  foodId    String
+  food      Food     @relation(fields: [foodId], references: [id], onDelete: Cascade)
+  quantity  Float
+  unit      String   // g, oz, kg, cup, tbsp, tsp, ml
+  notes     String?
 }

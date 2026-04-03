@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/Button'
@@ -17,12 +17,20 @@ interface NutritionLog {
   createdAt: string
 }
 
+interface Recipe {
+  id: string
+  name: string
+  servings: number
+  ingredients: { food: { name: string } }[]
+}
+
 export default function NutritionPage() {
   const { status } = useSession()
   const router = useRouter()
   const [nutrition, setNutrition] = useState<NutritionLog[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [logMode, setLogMode] = useState<'manual' | 'recipe'>('manual')
   const [formData, setFormData] = useState({
     food: '',
     calories: '',
@@ -32,6 +40,12 @@ export default function NutritionPage() {
     portion: '',
   })
   const [submitting, setSubmitting] = useState(false)
+
+  const [recipeSearch, setRecipeSearch] = useState('')
+  const [recipeResults, setRecipeResults] = useState<Recipe[]>([])
+  const [searching, setSearching] = useState(false)
+  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null)
+  const [recipeServings, setRecipeServings] = useState(1)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -52,6 +66,57 @@ export default function NutritionPage() {
       console.error('Failed to fetch nutrition')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const searchRecipes = useCallback(async (q: string) => {
+    if (!q.trim()) {
+      setRecipeResults([])
+      return
+    }
+    setSearching(true)
+    try {
+      const res = await fetch('/api/recipes')
+      const data = await res.json()
+      const filtered = (data.recipes || []).filter((r: Recipe) =>
+        r.name.toLowerCase().includes(q.toLowerCase())
+      )
+      setRecipeResults(filtered)
+    } catch {
+      console.error('Search failed')
+    } finally {
+      setSearching(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (logMode === 'recipe' && recipeSearch.trim()) {
+        searchRecipes(recipeSearch)
+      }
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [recipeSearch, logMode, searchRecipes])
+
+  const handleRecipeSelect = async (recipe: Recipe) => {
+    setSelectedRecipe(recipe)
+    setRecipeSearch('')
+    setRecipeResults([])
+
+    try {
+      const res = await fetch(`/api/recipes/${recipe.id}/nutrition`)
+      const data = await res.json()
+      const total = data.total
+      setFormData({
+        food: recipe.name,
+        calories: total.calories.toString(),
+        protein: total.protein.toString(),
+        carbs: total.carbs.toString(),
+        fat: total.fat.toString(),
+        portion: `${recipeServings} serving${recipeServings > 1 ? 's' : ''}`,
+      })
+    } catch {
+      console.error('Failed to fetch recipe nutrition')
     }
   }
 
@@ -76,6 +141,8 @@ export default function NutritionPage() {
       if (res.ok) {
         setFormData({ food: '', calories: '', protein: '', carbs: '', fat: '', portion: '' })
         setShowForm(false)
+        setSelectedRecipe(null)
+        setRecipeServings(1)
         fetchNutrition()
       }
     } catch {
@@ -135,55 +202,127 @@ export default function NutritionPage() {
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="rounded-lg border border-gray-200 bg-white p-6 space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Input
-              label="Food"
-              placeholder="e.g., Chicken Breast"
-              value={formData.food}
-              onChange={(e) => setFormData({ ...formData, food: e.target.value })}
-              required
-            />
-            <Input
-              label="Calories"
-              type="number"
-              placeholder="250"
-              value={formData.calories}
-              onChange={(e) => setFormData({ ...formData, calories: e.target.value })}
-              required
-            />
-            <Input
-              label="Protein (g)"
-              type="number"
-              placeholder="30"
-              value={formData.protein}
-              onChange={(e) => setFormData({ ...formData, protein: e.target.value })}
-            />
-            <Input
-              label="Carbs (g)"
-              type="number"
-              placeholder="0"
-              value={formData.carbs}
-              onChange={(e) => setFormData({ ...formData, carbs: e.target.value })}
-            />
-            <Input
-              label="Fat (g)"
-              type="number"
-              placeholder="10"
-              value={formData.fat}
-              onChange={(e) => setFormData({ ...formData, fat: e.target.value })}
-            />
-            <Input
-              label="Portion"
-              placeholder="e.g., 150g"
-              value={formData.portion}
-              onChange={(e) => setFormData({ ...formData, portion: e.target.value })}
-            />
+        <div className="rounded-lg border border-gray-200 bg-white p-6 space-y-4">
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => { setLogMode('manual'); setSelectedRecipe(null); setRecipeSearch(''); }}
+              className={`px-4 py-2 text-sm font-medium rounded-lg ${logMode === 'manual' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+            >
+              Manual Entry
+            </button>
+            <button
+              type="button"
+              onClick={() => setLogMode('recipe')}
+              className={`px-4 py-2 text-sm font-medium rounded-lg ${logMode === 'recipe' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+            >
+              🍳 From Recipe
+            </button>
           </div>
-          <Button type="submit" disabled={submitting}>
-            {submitting ? 'Saving...' : 'Save Meal'}
-          </Button>
-        </form>
+
+          {logMode === 'recipe' && (
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Search your recipes..."
+                value={recipeSearch}
+                onChange={(e) => setRecipeSearch(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {searching && <p className="text-sm text-gray-400">Searching...</p>}
+              {recipeResults.length > 0 && (
+                <div className="max-h-48 overflow-y-auto rounded-lg border border-gray-200">
+                  {recipeResults.map((recipe) => (
+                    <button
+                      key={recipe.id}
+                      type="button"
+                      onClick={() => handleRecipeSelect(recipe)}
+                      className="flex w-full items-center justify-between px-4 py-2 text-left text-sm hover:bg-gray-50 border-b border-gray-100 last:border-0"
+                    >
+                      <div>
+                        <span className="font-medium text-gray-900">{recipe.name}</span>
+                        <span className="ml-2 text-gray-400">
+                          ({recipe.ingredients.length} ingredients, {recipe.servings} servings)
+                        </span>
+                      </div>
+                      <span className="text-blue-600 text-xs">Select →</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {recipeSearch && recipeResults.length === 0 && !searching && (
+                <p className="text-sm text-gray-500">No recipes found. <a href="/recipes/new" className="text-blue-600 hover:underline">Create one</a></p>
+              )}
+              {selectedRecipe && (
+                <div className="rounded-lg bg-green-50 border border-green-200 p-3 flex items-center justify-between">
+                  <div>
+                    <span className="font-medium text-green-800">Selected: {selectedRecipe.name}</span>
+                    <p className="text-xs text-green-600">Nutrition auto-filled</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedRecipe(null); setFormData({ food: '', calories: '', protein: '', carbs: '', fat: '', portion: '' }); }}
+                    className="text-sm text-green-600 hover:underline"
+                  >
+                    Change
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Input
+                label="Food"
+                placeholder={logMode === 'recipe' ? 'Auto-filled from recipe' : 'e.g., Chicken Breast'}
+                value={formData.food}
+                onChange={(e) => setFormData({ ...formData, food: e.target.value })}
+                required
+                readOnly={logMode === 'recipe' && !!selectedRecipe}
+              />
+              <Input
+                label="Calories"
+                type="number"
+                placeholder="250"
+                value={formData.calories}
+                onChange={(e) => setFormData({ ...formData, calories: e.target.value })}
+                required
+              />
+              <Input
+                label="Protein (g)"
+                type="number"
+                placeholder="30"
+                value={formData.protein}
+                onChange={(e) => setFormData({ ...formData, protein: e.target.value })}
+              />
+              <Input
+                label="Carbs (g)"
+                type="number"
+                placeholder="0"
+                value={formData.carbs}
+                onChange={(e) => setFormData({ ...formData, carbs: e.target.value })}
+              />
+              <Input
+                label="Fat (g)"
+                type="number"
+                placeholder="10"
+                value={formData.fat}
+                onChange={(e) => setFormData({ ...formData, fat: e.target.value })}
+              />
+              <Input
+                label="Portion"
+                placeholder={logMode === 'recipe' ? 'Auto-filled' : 'e.g., 150g'}
+                value={formData.portion}
+                onChange={(e) => setFormData({ ...formData, portion: e.target.value })}
+                readOnly={logMode === 'recipe' && !!selectedRecipe}
+              />
+            </div>
+            <Button type="submit" disabled={submitting}>
+              {submitting ? 'Saving...' : 'Save Meal'}
+            </Button>
+          </form>
+        </div>
       )}
 
       {nutrition.length === 0 ? (
