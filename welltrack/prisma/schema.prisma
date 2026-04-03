@@ -18,6 +18,10 @@ model User {
   workouts     Workout[]
   nutrition    NutritionLog[]
   hydration    HydrationLog[]
+  goals        Goal[]
+  foodImages   FoodImage[]
+  preferences  UserPreference?
+  aiCache      AICache[]
 }
 
 model Workout {
@@ -57,4 +61,69 @@ model HydrationLog {
   createdAt DateTime @default(now())
 
   @@index([userId, createdAt])
+}
+
+model Goal {
+  id           String     @id @default(cuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type         String
+  title        String
+  targetValue  Float
+  currentValue Float      @default(0)
+  deadline     DateTime?
+  status       String     @default("active")
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  progress     GoalProgress[]
+
+  @@index([userId, status])
+}
+
+model GoalProgress {
+  id       String   @id @default(cuid())
+  goalId   String
+  goal     Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  value    Float
+  notes    String?
+  loggedAt DateTime @default(now())
+}
+
+model FoodImage {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  imageUrl         String
+  cloudinaryPublicId String?
+  parsedData       Json?
+  nutritionLogId   String?
+  createdAt        DateTime @default(now())
+}
+
+model UserPreference {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  calorieGoal   Int      @default(2000)
+  proteinGoal   Float    @default(50)
+  carbsGoal     Float    @default(250)
+  fatGoal       Float    @default(65)
+  waterGoal     Int      @default(2500)
+  dietType      String?
+  restrictions  String[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model AICache {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  key       String
+  data      Json
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@unique([userId, key])
+  @@index([userId, expiresAt])
 }

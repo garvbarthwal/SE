@@ -9,7 +9,11 @@ export async function middleware(request: NextRequest) {
   const isProtectedRoute = pathname.startsWith('/dashboard') ||
     pathname.startsWith('/workouts') ||
     pathname.startsWith('/nutrition') ||
-    pathname.startsWith('/hydration')
+    pathname.startsWith('/hydration') ||
+    pathname.startsWith('/goals') ||
+    pathname.startsWith('/analyze-food') ||
+    pathname.startsWith('/recommendations') ||
+    pathname.startsWith('/analytics')
 
   if (isProtectedRoute && !session) {
     return NextResponse.redirect(new URL('/login', request.url))
@@ -23,5 +27,16 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/workouts/:path*', '/nutrition/:path*', '/hydration/:path*', '/login', '/register'],
+  matcher: [
+    '/dashboard/:path*',
+    '/workouts/:path*',
+    '/nutrition/:path*',
+    '/hydration/:path*',
+    '/goals/:path*',
+    '/analyze-food/:path*',
+    '/recommendations/:path*',
+    '/analytics/:path*',
+    '/login',
+    '/register',
+  ],
 }

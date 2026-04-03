@@ -12,11 +12,28 @@ interface DashboardStats {
   nutritionCount: number
 }
 
+interface Recommendation {
+  title: string
+  description: string
+  type: string
+}
+
+interface Insight {
+  title: string
+  description: string
+  type: string
+}
+
 export default function DashboardPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([])
+  const [insights, setInsights] = useState<Insight[]>([])
+  const [aiLoading, setAiLoading] = useState(() => {
+    return !sessionStorage.getItem('ai_recommendations_fetched')
+  })
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -32,6 +49,19 @@ export default function DashboardPage() {
           setLoading(false)
         })
         .catch(() => setLoading(false))
+
+      const aiFetched = sessionStorage.getItem('ai_recommendations_fetched')
+      if (!aiFetched) {
+        fetch('/api/ai/recommendations')
+          .then((res) => res.json())
+          .then((data) => {
+            setRecommendations(data.recommendations || [])
+            setInsights(data.insights || [])
+            sessionStorage.setItem('ai_recommendations_fetched', 'true')
+          })
+          .catch(() => {})
+          .finally(() => setAiLoading(false))
+      }
     }
   }, [status, router])
 
@@ -41,6 +71,19 @@ export default function DashboardPage() {
         <div className="text-gray-500">Loading...</div>
       </div>
     )
+  }
+
+  const typeIcons: Record<string, string> = {
+    nutrition: '🍎',
+    workout: '💪',
+    hydration: '💧',
+    general: '🎯',
+  }
+
+  const insightColors: Record<string, string> = {
+    positive: 'border-green-200 bg-green-50',
+    warning: 'border-yellow-200 bg-yellow-50',
+    neutral: 'border-gray-200 bg-gray-50',
   }
 
   return (
@@ -106,8 +149,79 @@ export default function DashboardPage() {
           >
             Add Water
           </Link>
+          <Link
+            href="/analyze-food"
+            className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700"
+          >
+            📷 AI Food Analysis
+          </Link>
+          <Link
+            href="/goals"
+            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            🎯 Goals
+          </Link>
         </div>
       </div>
+
+      {aiLoading ? (
+        <div className="rounded-lg border border-gray-200 bg-white p-6">
+          <div className="flex items-center gap-3">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+            <p className="text-sm text-gray-500">Generating your personalized insights...</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          {insights.length > 0 && (
+            <div className="rounded-lg border border-gray-200 bg-white p-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900">Smart Insights</h2>
+                <Link href="/recommendations" className="text-sm text-blue-600 hover:underline">
+                  View all →
+                </Link>
+              </div>
+              <div className="mt-4 space-y-3">
+                {insights.slice(0, 2).map((insight, i) => (
+                  <div
+                    key={i}
+                    className={`rounded-lg border p-4 ${insightColors[insight.type] || 'border-gray-200 bg-gray-50'}`}
+                  >
+                    <h3 className="font-medium text-gray-900">{insight.title}</h3>
+                    <p className="mt-1 text-sm text-gray-600">{insight.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {recommendations.length > 0 && (
+            <div className="rounded-lg border border-gray-200 bg-white p-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900">AI Recommendations</h2>
+                <Link href="/recommendations" className="text-sm text-blue-600 hover:underline">
+                  View all →
+                </Link>
+              </div>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {recommendations.slice(0, 3).map((rec, i) => (
+                  <div
+                    key={i}
+                    className="rounded-lg border border-gray-100 bg-gray-50 p-4 space-y-2"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>{typeIcons[rec.type] || '💡'}</span>
+                      <span className="text-xs font-medium capitalize text-gray-500">{rec.type}</span>
+                    </div>
+                    <h3 className="font-medium text-gray-900">{rec.title}</h3>
+                    <p className="text-sm text-gray-600">{rec.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </div>
   )
 }

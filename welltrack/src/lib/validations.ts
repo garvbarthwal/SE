@@ -31,3 +31,25 @@ export const nutritionSchema = z.object({
 export const hydrationSchema = z.object({
   amount: z.number().min(1, 'Amount must be at least 1ml'),
 })
+
+export const goalSchema = z.object({
+  type: z.enum(['weight', 'workout', 'nutrition', 'hydration']),
+  title: z.string().min(1, 'Title is required'),
+  targetValue: z.number().min(0, 'Target must be positive'),
+  deadline: z.string().optional(),
+})
+
+export const goalProgressSchema = z.object({
+  value: z.number(),
+  notes: z.string().optional(),
+})
+
+export const userPreferenceSchema = z.object({
+  calorieGoal: z.number().min(500).max(10000),
+  proteinGoal: z.number().min(0).max(500),
+  carbsGoal: z.number().min(0).max(1000),
+  fatGoal: z.number().min(0).max(500),
+  waterGoal: z.number().min(500).max(10000),
+  dietType: z.string().optional(),
+  restrictions: z.array(z.string()).optional(),
+})

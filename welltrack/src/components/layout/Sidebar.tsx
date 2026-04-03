@@ -8,6 +8,10 @@ const navItems = [
   { href: '/workouts', label: 'Workouts', icon: '💪' },
   { href: '/nutrition', label: 'Nutrition', icon: '🍎' },
   { href: '/hydration', label: 'Hydration', icon: '💧' },
+  { href: '/goals', label: 'Goals', icon: '🎯' },
+  { href: '/analyze-food', label: 'AI Food', icon: '📷' },
+  { href: '/recommendations', label: 'AI Insights', icon: '🤖' },
+  { href: '/analytics', label: 'Analytics', icon: '📈' },
 ]
 
 export function Sidebar() {
