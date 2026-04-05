@@ -1,23 +1,30 @@
 @import "tailwindcss";
 
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Barlow:wght@300;400;500;600;700&display=swap');
+
 :root {
-  --background: #f8fafc;
-  --foreground: #1e293b;
-  --primary: #22c55e;
-  --primary-hover: #16a34a;
-  --primary-foreground: #ffffff;
-  --primary-light: #f0fdf4;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #1e293b;
-  --destructive: #dc2626;
-  --destructive-hover: #b91c1c;
-  --destructive-foreground: #ffffff;
-  --muted: #64748b;
-  --border: #e2e8f0;
-  --border-focus: #cbd5e1;
-  --ring: #22c55e;
-  --surface: #ffffff;
-  --surface-hover: #f8fafc;
+  --background: #F8FAFC;
+  --foreground: #1E293B;
+  --primary: #F97316;
+  --primary-hover: #EA580C;
+  --primary-foreground: #FFFFFF;
+  --primary-light: #FFF7ED;
+  --secondary: #FB923C;
+  --secondary-hover: #F97316;
+  --cta: #22C55E;
+  --cta-hover: #16A34A;
+  --destructive: #DC2626;
+  --destructive-hover: #B91C1C;
+  --destructive-foreground: #FFFFFF;
+  --muted: #64748B;
+  --muted-foreground: #64748B;
+  --border: #E2E8F0;
+  --border-focus: #CBD5E1;
+  --ring: #F97316;
+  --surface: #FFFFFF;
+  --surface-hover: #F8FAFC;
+  --card: #FFFFFF;
+  --card-foreground: #1E293B;
 }
 
 @theme inline {
@@ -28,16 +35,21 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-light: var(--primary-light);
   --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-cta: var(--cta);
+  --color-cta-hover: var(--cta-hover);
   --color-destructive: var(--destructive);
   --color-destructive-hover: var(--destructive-hover);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-border-focus: var(--border-focus);
   --color-ring: var(--ring);
   --color-surface: var(--surface);
   --color-surface-hover: var(--surface-hover);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
 }
 
 * {
@@ -47,8 +59,14 @@
 body {
   background: var(--background);
   color: var(--foreground);
+  font-family: 'Barlow', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
 }
 
 input[type="number"]::-webkit-inner-spin-button,
@@ -59,4 +77,22 @@ input[type="number"]::-webkit-outer-spin-button {
 
 input[type="number"] {
   -moz-appearance: textfield;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
 }
