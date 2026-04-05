@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import Link from 'next/link'
+import { Target, Plus, X, Trash2, Calendar, ChevronRight, TrendingUp } from 'lucide-react'
 
 interface Goal {
   id: string
@@ -16,6 +17,13 @@ interface Goal {
   deadline: string | null
   status: string
   progress: { value: number; loggedAt: string }[]
+}
+
+const goalTypeColors: Record<string, string> = {
+  weight: 'bg-orange-100 text-orange-700',
+  workout: 'bg-green-100 text-green-700',
+  nutrition: 'bg-blue-100 text-blue-700',
+  hydration: 'bg-cyan-100 text-cyan-700',
 }
 
 export default function GoalsPage() {
@@ -92,18 +100,23 @@ export default function GoalsPage() {
   }
 
   if (loading) {
-    return <div className="flex h-64 items-center justify-center text-sm text-slate-500">Loading...</div>
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-3 border-orange-500 border-t-transparent" />
+      </div>
+    )
   }
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Goals</h1>
-          <p className="mt-1 text-sm text-slate-500">Set and track your fitness goals</p>
+          <h1 className="text-2xl font-bold text-slate-900">Goals</h1>
+          <p className="mt-1 text-slate-500">Set and track your fitness goals</p>
         </div>
-        <Button onClick={() => setShowForm(!showForm)}>
-          {showForm ? 'Cancel' : '+ New Goal'}
+        <Button onClick={() => setShowForm(!showForm)} className="flex items-center gap-2">
+          {showForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+          {showForm ? 'Cancel' : 'New Goal'}
         </Button>
       </div>
 
@@ -115,7 +128,7 @@ export default function GoalsPage() {
               <select
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-colors"
               >
                 <option value="weight">Weight</option>
                 <option value="workout">Workout</option>
@@ -153,23 +166,21 @@ export default function GoalsPage() {
 
       {goals.length === 0 ? (
         <div className="rounded-xl border border-slate-200 bg-white p-8 text-center">
-          <p className="text-sm text-slate-500">No goals set yet. Create your first goal to start tracking progress!</p>
+          <Target className="mx-auto h-12 w-12 text-slate-300" />
+          <p className="mt-4 text-sm text-slate-500">No goals set yet. Create your first goal to start tracking progress!</p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {goals.map((goal) => {
             const progress = goal.targetValue > 0 ? Math.min((goal.currentValue / goal.targetValue) * 100, 100) : 0
-            const radius = 40
-            const circumference = Math.PI * radius
-            const strokeDashoffset = circumference - (progress / 100) * circumference
 
             return (
               <div
                 key={goal.id}
-                className="rounded-xl border border-slate-200 bg-white p-6 space-y-4"
+                className="rounded-xl border border-slate-200 bg-white p-6 space-y-4 hover:border-orange-200 transition-colors"
               >
                 <div className="flex items-center justify-between">
-                  <span className="rounded-md bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 capitalize">
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${goalTypeColors[goal.type] || goalTypeColors.weight}`}>
                     {goal.type}
                   </span>
                   <span className={`text-xs font-medium ${goal.status === 'completed' ? 'text-green-600' : 'text-slate-400'}`}>
@@ -183,31 +194,31 @@ export default function GoalsPage() {
                       <circle
                         cx="50"
                         cy="50"
-                        r={radius}
+                        r={40}
                         fill="none"
-                        stroke="#e2e8f0"
+                        stroke="#E2E8F0"
                         strokeWidth="8"
                         strokeLinecap="round"
-                        strokeDasharray={circumference}
+                        strokeDasharray={Math.PI * 40}
                         strokeDashoffset={0}
                         transform="rotate(180 50 50)"
                       />
                       <circle
                         cx="50"
                         cy="50"
-                        r={radius}
+                        r={40}
                         fill="none"
-                        stroke="#22c55e"
+                        stroke="#F97316"
                         strokeWidth="8"
                         strokeLinecap="round"
-                        strokeDasharray={circumference}
-                        strokeDashoffset={strokeDashoffset}
+                        strokeDasharray={Math.PI * 40}
+                        strokeDashoffset={Math.PI * 40 - (progress / 100) * Math.PI * 40}
                         transform="rotate(180 50 50)"
                         className="transition-all duration-500"
                       />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center pt-4">
-                      <span className="text-lg font-semibold text-slate-900">{Math.round(progress)}%</span>
+                      <span className="text-lg font-bold text-slate-900">{Math.round(progress)}%</span>
                     </div>
                   </div>
                 </div>
@@ -216,13 +227,21 @@ export default function GoalsPage() {
 
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-400">Current</span>
-                  <span className="text-sm text-slate-900">
+                  <span className="text-sm font-medium text-slate-900">
                     {goal.currentValue} / {goal.targetValue}
                   </span>
                 </div>
 
+                <div className="w-full bg-slate-100 rounded-full h-1.5">
+                  <div
+                    className="bg-gradient-to-r from-orange-400 to-orange-500 h-1.5 rounded-full transition-all duration-500"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+
                 {goal.deadline && (
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-400 flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
                     Due: {new Date(goal.deadline).toLocaleDateString()}
                   </p>
                 )}
@@ -230,12 +249,12 @@ export default function GoalsPage() {
                 <div className="flex gap-2">
                   <Link
                     href={`/goals/${goal.id}`}
-                    className="flex-1 text-center rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                    className="flex-1 flex items-center justify-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
                   >
-                    View
+                    View <ChevronRight className="h-3.5 w-3.5" />
                   </Link>
-                  <Button variant="destructive" size="sm" onClick={() => handleDelete(goal.id)}>
-                    Delete
+                  <Button variant="destructive" size="sm" onClick={() => handleDelete(goal.id)} className="flex items-center gap-1">
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </div>

@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { UNITS } from '@/lib/units'
+import { ArrowLeft, Plus, Search, ChefHat, Flame, Wheat, Trash2 } from 'lucide-react'
 
 interface Food {
   id: string
@@ -169,17 +170,23 @@ export default function NewRecipePage() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      <div>
-        <Button variant="ghost" onClick={() => router.push('/recipes')}>
-          ← Back to Recipes
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" onClick={() => router.push('/recipes')} className="flex items-center gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          Back
         </Button>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-900">Create Recipe</h1>
-        <p className="mt-1 text-sm text-slate-500">Build your custom recipe with automatic nutrition calculation</p>
+      </div>
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">Create Recipe</h1>
+        <p className="mt-1 text-slate-500">Build your custom recipe with automatic nutrition calculation</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="rounded-xl border border-slate-200 bg-white p-6 space-y-4">
-          <h2 className="text-base font-semibold text-slate-900">Recipe Details</h2>
+          <div className="flex items-center gap-2 mb-2">
+            <ChefHat className="h-5 w-5 text-orange-500" />
+            <h2 className="text-base font-semibold text-slate-900">Recipe Details</h2>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <Input
               label="Recipe Name"
@@ -202,15 +209,15 @@ export default function NewRecipePage() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-colors"
             />
           </div>
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
               checked={isPublic}
               onChange={(e) => setIsPublic(e.target.checked)}
-              className="rounded border-slate-300 text-green-600 focus:ring-green-500"
+              className="rounded border-slate-300 text-orange-500 focus:ring-orange-400"
             />
             <span className="text-sm text-slate-600">Share with community</span>
           </label>
@@ -218,21 +225,31 @@ export default function NewRecipePage() {
 
         <div className="rounded-xl border border-slate-200 bg-white p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold text-slate-900">Ingredients</h2>
-            <Button type="button" variant="secondary" onClick={() => setShowSearch(!showSearch)}>
-              + Add Ingredient
+            <div className="flex items-center gap-2">
+              <Wheat className="h-5 w-5 text-orange-500" />
+              <h2 className="text-base font-semibold text-slate-900">Ingredients</h2>
+              {ingredients.length > 0 && (
+                <span className="text-xs text-slate-400">({ingredients.length})</span>
+              )}
+            </div>
+            <Button type="button" variant="secondary" onClick={() => setShowSearch(!showSearch)} className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Add Ingredient
             </Button>
           </div>
 
           {showSearch && (
             <div className="space-y-2">
-              <input
-                type="text"
-                placeholder="Search foods..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search foods..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full rounded-lg border border-slate-200 pl-10 pr-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+                />
+              </div>
               {searching && <p className="text-sm text-slate-400">Searching...</p>}
               {searchResults.length > 0 && (
                 <div className="max-h-48 overflow-y-auto rounded-lg border border-slate-200">
@@ -241,7 +258,7 @@ export default function NewRecipePage() {
                       key={food.id}
                       type="button"
                       onClick={() => addIngredient(food)}
-                      className="flex w-full items-center justify-between px-4 py-2 text-left text-sm hover:bg-slate-50 border-b border-slate-100 last:border-0"
+                      className="flex w-full items-center justify-between px-4 py-2.5 text-left text-sm hover:bg-slate-50 border-b border-slate-100 last:border-0"
                     >
                       <span className="font-medium text-slate-900">{food.name}</span>
                       <span className="text-slate-400">{food.calories} cal/100g</span>
@@ -256,29 +273,32 @@ export default function NewRecipePage() {
           )}
 
           {ingredients.length === 0 ? (
-            <p className="text-center text-slate-500 py-4">No ingredients added yet</p>
+            <div className="text-center py-8">
+              <Wheat className="mx-auto h-10 w-10 text-slate-300" />
+              <p className="mt-2 text-sm text-slate-500">No ingredients added yet</p>
+            </div>
           ) : (
             <div className="space-y-3">
               {ingredients.map((ing) => (
                 <div
                   key={ing.id}
-                  className="flex items-center gap-3 rounded-lg border border-slate-200 p-4"
+                  className="flex items-center gap-4 rounded-lg border border-slate-200 p-4 hover:border-orange-200 transition-colors"
                 >
                   <div className="flex-1">
                     <p className="text-sm font-medium text-slate-900">{ing.foodName}</p>
-                    <div className="mt-1 flex items-center gap-2">
+                    <div className="mt-1.5 flex items-center gap-2">
                       <input
                         type="number"
                         value={ing.quantity}
                         onChange={(e) => updateIngredient(ing.id, 'quantity', parseFloat(e.target.value) || 0)}
-                        className="w-20 rounded-lg border border-slate-200 px-2 py-1 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-green-500"
+                        className="w-20 rounded-lg border border-slate-200 px-2 py-1.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-400"
                         min="0"
                         step="1"
                       />
                       <select
                         value={ing.unit}
                         onChange={(e) => updateIngredient(ing.id, 'unit', e.target.value)}
-                        className="rounded-lg border border-slate-200 px-2 py-1 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-green-500"
+                        className="rounded-lg border border-slate-200 px-2 py-1.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-400"
                       >
                         {UNITS.map((u) => (
                           <option key={u.value} value={u.value}>{u.label}</option>
@@ -287,15 +307,15 @@ export default function NewRecipePage() {
                     </div>
                   </div>
                   <div className="text-right text-sm text-slate-500">
-                    <p>{ing.calories} cal</p>
+                    <p className="font-medium text-slate-700">{ing.calories} cal</p>
                     <p>P: {ing.protein}g · C: {ing.carbs}g · F: {ing.fat}g</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => removeIngredient(ing.id)}
-                    className="text-slate-400 hover:text-red-500"
+                    className="text-slate-400 hover:text-red-500 transition-colors"
                   >
-                    ✕
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               ))}
@@ -305,24 +325,15 @@ export default function NewRecipePage() {
 
         {ingredients.length > 0 && (
           <div className="rounded-xl border border-slate-200 bg-white p-6">
-            <h2 className="text-base font-semibold text-slate-900">Total Nutrition</h2>
-            <div className="mt-4 grid grid-cols-4 gap-3">
-              <div className="rounded-lg border border-slate-200 bg-white p-4 text-center">
-                <p className="text-xl font-semibold text-slate-900">{totals.calories}</p>
-                <p className="text-xs text-slate-400">Calories</p>
-              </div>
-              <div className="rounded-lg border border-slate-200 bg-white p-4 text-center">
-                <p className="text-xl font-semibold text-slate-900">{totals.protein}g</p>
-                <p className="text-xs text-slate-400">Protein</p>
-              </div>
-              <div className="rounded-lg border border-slate-200 bg-white p-4 text-center">
-                <p className="text-xl font-semibold text-slate-900">{totals.carbs}g</p>
-                <p className="text-xs text-slate-400">Carbs</p>
-              </div>
-              <div className="rounded-lg border border-slate-200 bg-white p-4 text-center">
-                <p className="text-xl font-semibold text-slate-900">{totals.fat}g</p>
-                <p className="text-xs text-slate-400">Fat</p>
-              </div>
+            <div className="flex items-center gap-2 mb-4">
+              <Flame className="h-5 w-5 text-orange-500" />
+              <h2 className="text-base font-semibold text-slate-900">Total Nutrition</h2>
+            </div>
+            <div className="grid grid-cols-4 gap-3">
+              <MacroCard value={totals.calories} label="Calories" unit="" color="orange" />
+              <MacroCard value={totals.protein} label="Protein" unit="g" color="blue" />
+              <MacroCard value={totals.carbs} label="Carbs" unit="g" color="cyan" />
+              <MacroCard value={totals.fat} label="Fat" unit="g" color="amber" />
             </div>
             {servings > 1 && (
               <p className="mt-3 text-sm text-slate-500">
@@ -336,6 +347,24 @@ export default function NewRecipePage() {
           {submitting ? 'Saving...' : 'Save Recipe'}
         </Button>
       </form>
+    </div>
+  )
+}
+
+function MacroCard({ value, label, unit, color }: { value: number; label: string; unit: string; color: string }) {
+  const colorMap: Record<string, string> = {
+    orange: 'text-orange-600 bg-orange-50',
+    blue: 'text-blue-600 bg-blue-50',
+    cyan: 'text-cyan-600 bg-cyan-50',
+    amber: 'text-amber-600 bg-amber-50',
+  }
+
+  return (
+    <div className={`rounded-lg p-4 text-center ${colorMap[color]}`}>
+      <p className="text-xl font-bold">
+        {typeof value === 'number' ? (Number.isInteger(value) ? value : value.toFixed(1)) : value}{unit}
+      </p>
+      <p className="text-xs text-slate-500 mt-0.5">{label}</p>
     </div>
   )
 }
