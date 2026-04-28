@@ -775,7 +775,7 @@ export default function NutritionPage() {
       )}
 
       <Dialog open={batchOpen} onOpenChange={setBatchOpen}>
-        <DialogContent className="w-[calc(100vw-2rem)] !max-w-6xl overflow-hidden rounded-2xl border-slate-200 bg-white p-0 shadow-2xl shadow-slate-950/20">
+        <DialogContent className="w-[calc(100vw-2rem)] !max-w-3xl overflow-hidden rounded-2xl border-slate-200 bg-white p-0 shadow-2xl shadow-slate-950/20">
           <DialogHeader className="border-b border-slate-100 px-6 py-5 pr-14">
             <DialogTitle className="text-xl font-semibold text-slate-950">Batch Edit Meals</DialogTitle>
             <DialogDescription className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
@@ -813,55 +813,51 @@ export default function NutritionPage() {
                 </Button>
               </div>
             ) : (
-              <div className="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white">
-                <div className="max-h-[56vh] overflow-auto">
-                  <table className="w-full min-w-[1100px] text-left text-sm">
-                    <thead className="sticky top-0 z-10 bg-slate-50 text-slate-500 shadow-[inset_0_-1px_0_#e2e8f0]">
-                      <tr>
-                        <th className="px-4 py-3 font-medium">Food</th>
-                        <th className="px-4 py-3 font-medium">Calories</th>
-                        <th className="px-4 py-3 font-medium">Protein</th>
-                        <th className="px-4 py-3 font-medium">Carbs</th>
-                        <th className="px-4 py-3 font-medium">Fat</th>
-                        <th className="px-4 py-3 font-medium">Portion</th>
-                        <th className="px-4 py-3 font-medium">Logged At</th>
-                        <th className="px-4 py-3 font-medium text-right">Row</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {batchRows.map((row) => (
-                        <tr key={row.clientId} className="border-t border-slate-100 align-top hover:bg-slate-50">
-                          <td className="px-4 py-3">
-                            <input value={row.food} onChange={(event) => updateBatchRow(row.clientId, 'food', event.target.value)} className="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400" />
-                          </td>
-                          <td className="px-4 py-3">
-                            <input type="number" value={row.calories} onChange={(event) => updateBatchRow(row.clientId, 'calories', event.target.value)} className="w-28 rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400" />
-                          </td>
-                          <td className="px-4 py-3">
-                            <input type="number" value={row.protein} onChange={(event) => updateBatchRow(row.clientId, 'protein', event.target.value)} className="w-24 rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400" />
-                          </td>
-                          <td className="px-4 py-3">
-                            <input type="number" value={row.carbs} onChange={(event) => updateBatchRow(row.clientId, 'carbs', event.target.value)} className="w-24 rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400" />
-                          </td>
-                          <td className="px-4 py-3">
-                            <input type="number" value={row.fat} onChange={(event) => updateBatchRow(row.clientId, 'fat', event.target.value)} className="w-24 rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400" />
-                          </td>
-                          <td className="px-4 py-3">
-                            <input value={row.portion} onChange={(event) => updateBatchRow(row.clientId, 'portion', event.target.value)} className="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400" />
-                          </td>
-                          <td className="px-4 py-3">
-                            <input type="datetime-local" value={row.createdAt} onChange={(event) => updateBatchRow(row.clientId, 'createdAt', event.target.value)} className="w-52 rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400" />
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            <Button type="button" variant="ghost" size="sm" onClick={() => removeBatchRow(row.clientId)} className="cursor-pointer text-slate-500 hover:text-slate-900">
-                              Remove
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+              <div className="max-h-[54vh] space-y-3 overflow-y-auto pr-1">
+                {batchRows.map((row, index) => (
+                  <div key={row.clientId} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">Meal {index + 1}</p>
+                        <p className="text-xs text-slate-500">{row.id ? 'Saved row' : 'New row'}</p>
+                      </div>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => removeBatchRow(row.clientId)} className="cursor-pointer rounded-lg text-slate-500 hover:text-red-600">
+                        Remove
+                      </Button>
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <label className="sm:col-span-2">
+                        <span className="text-xs font-medium text-slate-500">Food</span>
+                        <input value={row.food} onChange={(event) => updateBatchRow(row.clientId, 'food', event.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400" />
+                      </label>
+                      <label>
+                        <span className="text-xs font-medium text-slate-500">Calories</span>
+                        <input type="number" value={row.calories} onChange={(event) => updateBatchRow(row.clientId, 'calories', event.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400" />
+                      </label>
+                      <label>
+                        <span className="text-xs font-medium text-slate-500">Logged At</span>
+                        <input type="datetime-local" value={row.createdAt} onChange={(event) => updateBatchRow(row.clientId, 'createdAt', event.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400" />
+                      </label>
+                      <label>
+                        <span className="text-xs font-medium text-slate-500">Protein</span>
+                        <input type="number" value={row.protein} onChange={(event) => updateBatchRow(row.clientId, 'protein', event.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400" />
+                      </label>
+                      <label>
+                        <span className="text-xs font-medium text-slate-500">Carbs</span>
+                        <input type="number" value={row.carbs} onChange={(event) => updateBatchRow(row.clientId, 'carbs', event.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400" />
+                      </label>
+                      <label>
+                        <span className="text-xs font-medium text-slate-500">Fat</span>
+                        <input type="number" value={row.fat} onChange={(event) => updateBatchRow(row.clientId, 'fat', event.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400" />
+                      </label>
+                      <label>
+                        <span className="text-xs font-medium text-slate-500">Portion</span>
+                        <input value={row.portion} onChange={(event) => updateBatchRow(row.clientId, 'portion', event.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400" />
+                      </label>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>

@@ -510,7 +510,7 @@ export default function HydrationPage() {
       )}
 
       <Dialog open={batchOpen} onOpenChange={setBatchOpen}>
-        <DialogContent className="w-[calc(100vw-2rem)] !max-w-4xl overflow-hidden rounded-2xl border-slate-200 bg-white p-0 shadow-2xl shadow-slate-950/20">
+        <DialogContent className="w-[calc(100vw-2rem)] !max-w-2xl overflow-hidden rounded-2xl border-slate-200 bg-white p-0 shadow-2xl shadow-slate-950/20">
           <DialogHeader className="border-b border-slate-100 px-6 py-5 pr-14">
             <DialogTitle className="text-xl font-semibold text-slate-950">Batch Edit Hydration Logs</DialogTitle>
             <DialogDescription className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
@@ -548,35 +548,31 @@ export default function HydrationPage() {
                 </Button>
               </div>
             ) : (
-              <div className="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white">
-                <div className="max-h-[56vh] overflow-auto">
-                  <table className="w-full min-w-[640px] text-left text-sm">
-                    <thead className="sticky top-0 z-10 bg-slate-50 text-slate-500 shadow-[inset_0_-1px_0_#e2e8f0]">
-                      <tr>
-                        <th className="px-4 py-3 font-medium">Amount (ml)</th>
-                        <th className="px-4 py-3 font-medium">Logged At</th>
-                        <th className="px-4 py-3 font-medium text-right">Row</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {batchRows.map((row) => (
-                        <tr key={row.clientId} className="border-t border-slate-100 align-top hover:bg-slate-50">
-                          <td className="px-4 py-3">
-                            <input type="number" value={row.amount} onChange={(event) => updateBatchRow(row.clientId, 'amount', event.target.value)} className="w-32 rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400" />
-                          </td>
-                          <td className="px-4 py-3">
-                            <input type="datetime-local" value={row.createdAt} onChange={(event) => updateBatchRow(row.clientId, 'createdAt', event.target.value)} className="w-56 rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400" />
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            <Button type="button" variant="ghost" size="sm" onClick={() => removeBatchRow(row.clientId)} className="cursor-pointer text-slate-500 hover:text-slate-900">
-                              Remove
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+              <div className="max-h-[54vh] space-y-3 overflow-y-auto pr-1">
+                {batchRows.map((row, index) => (
+                  <div key={row.clientId} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/60">
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">Water log {index + 1}</p>
+                        <p className="text-xs text-slate-500">{row.id ? 'Saved row' : 'New row'}</p>
+                      </div>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => removeBatchRow(row.clientId)} className="cursor-pointer rounded-lg text-slate-500 hover:text-red-600">
+                        Remove
+                      </Button>
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <label>
+                        <span className="text-xs font-medium text-slate-500">Amount (ml)</span>
+                        <input type="number" value={row.amount} onChange={(event) => updateBatchRow(row.clientId, 'amount', event.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400" />
+                      </label>
+                      <label>
+                        <span className="text-xs font-medium text-slate-500">Logged At</span>
+                        <input type="datetime-local" value={row.createdAt} onChange={(event) => updateBatchRow(row.clientId, 'createdAt', event.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400" />
+                      </label>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
