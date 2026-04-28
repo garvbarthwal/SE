@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+const trackedAtSchema = z.coerce.date().optional()
+
 export const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
@@ -19,6 +21,17 @@ export const workoutSchema = z.object({
   notes: z.string().optional(),
 })
 
+export const workoutEntrySchema = workoutSchema.extend({
+  createdAt: trackedAtSchema,
+})
+
+export const workoutPatchFieldsSchema = workoutEntrySchema.partial()
+
+export const workoutUpdateSchema = workoutPatchFieldsSchema.refine(
+  (value) => Object.values(value).some((field) => field !== undefined),
+  'At least one field is required'
+)
+
 export const nutritionSchema = z.object({
   food: z.string().min(1, 'Food name is required'),
   calories: z.number().min(0, 'Calories must be a positive number'),
@@ -28,9 +41,31 @@ export const nutritionSchema = z.object({
   portion: z.string().optional(),
 })
 
+export const nutritionEntrySchema = nutritionSchema.extend({
+  createdAt: trackedAtSchema,
+})
+
+export const nutritionPatchFieldsSchema = nutritionEntrySchema.partial()
+
+export const nutritionUpdateSchema = nutritionPatchFieldsSchema.refine(
+  (value) => Object.values(value).some((field) => field !== undefined),
+  'At least one field is required'
+)
+
 export const hydrationSchema = z.object({
   amount: z.number().min(1, 'Amount must be at least 1ml'),
 })
+
+export const hydrationEntrySchema = hydrationSchema.extend({
+  createdAt: trackedAtSchema,
+})
+
+export const hydrationPatchFieldsSchema = hydrationEntrySchema.partial()
+
+export const hydrationUpdateSchema = hydrationPatchFieldsSchema.refine(
+  (value) => Object.values(value).some((field) => field !== undefined),
+  'At least one field is required'
+)
 
 export const goalSchema = z.object({
   type: z.enum(['weight', 'workout', 'nutrition', 'hydration']),
