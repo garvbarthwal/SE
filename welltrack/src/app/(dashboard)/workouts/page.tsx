@@ -131,6 +131,7 @@ export default function WorkoutsPage() {
   const [batchOpen, setBatchOpen] = useState(false)
   const [batchSaving, setBatchSaving] = useState(false)
   const [batchRows, setBatchRows] = useState<EditableWorkoutRow[]>([])
+  const [batchDeletedIds, setBatchDeletedIds] = useState<string[]>([])
   const [viewMode, setViewMode] = useState<'day' | 'range'>('day')
   const [selectedDate, setSelectedDate] = useState(today)
   const [rangeFrom, setRangeFrom] = useState(getRelativeDateKey(-6))
@@ -229,6 +230,7 @@ export default function WorkoutsPage() {
 
   function openBatchEditor() {
     setBatchRows(workouts.map(toEditableWorkoutRow))
+    setBatchDeletedIds([])
     setBatchOpen(true)
   }
 
@@ -256,6 +258,13 @@ export default function WorkoutsPage() {
   }
 
   function removeBatchRow(clientId: string) {
+    const row = batchRows.find((currentRow) => currentRow.clientId === clientId)
+    if (row?.id) {
+      setBatchDeletedIds((currentIds) => (
+        currentIds.includes(row.id!) ? currentIds : [...currentIds, row.id!]
+      ))
+    }
+
     setBatchRows((currentRows) => currentRows.filter((row) => row.clientId !== clientId))
   }
 
@@ -309,7 +318,20 @@ export default function WorkoutsPage() {
         }
       }
 
+      if (batchDeletedIds.length > 0) {
+        await Promise.all(
+          batchDeletedIds.map(async (id) => {
+            const res = await fetch(`/api/workouts/${id}`, { method: 'DELETE' })
+            if (!res.ok) {
+              const data = await res.json()
+              throw new Error(data.error || 'Failed to remove workouts')
+            }
+          })
+        )
+      }
+
       setBatchOpen(false)
+      setBatchDeletedIds([])
       await fetchWorkouts()
     } catch (batchError) {
       setError(batchError instanceof Error ? batchError.message : 'Failed to save batch changes')
@@ -529,108 +551,132 @@ export default function WorkoutsPage() {
       )}
 
       <Dialog open={batchOpen} onOpenChange={setBatchOpen}>
-        <DialogContent className="max-w-5xl">
-          <DialogHeader>
-            <DialogTitle>Batch Edit Workout Sessions</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="w-[calc(100vw-2rem)] !max-w-5xl overflow-hidden rounded-2xl border-slate-200 bg-white p-0 shadow-2xl shadow-slate-950/20">
+          <DialogHeader className="border-b border-slate-100 px-6 py-5 pr-14">
+            <DialogTitle className="text-xl font-semibold text-slate-950">Batch Edit Workout Sessions</DialogTitle>
+            <DialogDescription className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
               Update all visible sessions at once and add new historical rows before saving.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-sm text-slate-500">Editing {batchRows.length} row{batchRows.length === 1 ? '' : 's'} from {filterLabel}.</p>
-              <Button type="button" variant="outline" size="sm" onClick={addBatchRow} className="cursor-pointer gap-2 rounded-lg">
+          <div className="min-w-0 space-y-4 px-6 py-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-medium text-slate-900">{filterLabel}</p>
+                <p className="mt-1 text-sm text-slate-500">
+                  {batchRows.length} active session row{batchRows.length === 1 ? '' : 's'}
+                  {batchDeletedIds.length > 0 ? `, ${batchDeletedIds.length} marked for removal` : ''}
+                </p>
+              </div>
+              <Button type="button" variant="outline" size="sm" onClick={addBatchRow} className="w-full cursor-pointer gap-2 rounded-lg border-orange-200 text-orange-700 hover:bg-orange-50 sm:w-auto">
                 <Plus className="h-4 w-4" />
                 Add Row
               </Button>
             </div>
 
-            <div className="max-h-[60vh] overflow-auto rounded-xl border border-slate-200">
-              <table className="w-full min-w-[920px] text-left text-sm">
-                <thead className="sticky top-0 bg-slate-50 text-slate-500">
-                  <tr>
-                    <th className="px-4 py-3 font-medium">Type</th>
-                    <th className="px-4 py-3 font-medium">Name</th>
-                    <th className="px-4 py-3 font-medium">Duration</th>
-                    <th className="px-4 py-3 font-medium">Calories</th>
-                    <th className="px-4 py-3 font-medium">Logged At</th>
-                    <th className="px-4 py-3 font-medium">Notes</th>
-                    <th className="px-4 py-3 font-medium text-right">Row</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {batchRows.map((row) => (
-                    <tr key={row.clientId} className="border-t border-slate-100 align-top hover:bg-slate-50">
-                      <td className="px-4 py-3">
-                        <select
-                          value={row.type}
-                          onChange={(event) => updateBatchRow(row.clientId, 'type', event.target.value)}
-                          className="w-28 rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400"
-                        >
-                          {workoutTypes.map((type) => (
-                            <option key={type} value={type}>
-                              {type}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td className="px-4 py-3">
-                        <input
-                          value={row.name}
-                          onChange={(event) => updateBatchRow(row.clientId, 'name', event.target.value)}
-                          className="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400"
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <input
-                          type="number"
-                          value={row.duration}
-                          onChange={(event) => updateBatchRow(row.clientId, 'duration', event.target.value)}
-                          className="w-24 rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400"
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <input
-                          type="number"
-                          value={row.calories}
-                          onChange={(event) => updateBatchRow(row.clientId, 'calories', event.target.value)}
-                          className="w-28 rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400"
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <input
-                          type="datetime-local"
-                          value={row.createdAt}
-                          onChange={(event) => updateBatchRow(row.clientId, 'createdAt', event.target.value)}
-                          className="w-52 rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400"
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <textarea
-                          value={row.notes}
-                          onChange={(event) => updateBatchRow(row.clientId, 'notes', event.target.value)}
-                          rows={1}
-                          className="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400"
-                        />
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <Button type="button" variant="ghost" size="sm" onClick={() => removeBatchRow(row.clientId)} className="cursor-pointer text-slate-500 hover:text-slate-900">
-                          Remove
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            {batchRows.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 text-orange-700">
+                  <Dumbbell className="h-5 w-5" />
+                </div>
+                <h3 className="mt-4 text-sm font-semibold text-slate-950">No workout rows in this view</h3>
+                <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500">
+                  Add a row to backfill a workout session for this date window.
+                </p>
+                <Button type="button" onClick={addBatchRow} className="mt-5 cursor-pointer gap-2 rounded-lg">
+                  <Plus className="h-4 w-4" />
+                  Add First Row
+                </Button>
+              </div>
+            ) : (
+              <div className="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white">
+                <div className="max-h-[56vh] overflow-auto">
+                  <table className="w-full min-w-[920px] text-left text-sm">
+                    <thead className="sticky top-0 z-10 bg-slate-50 text-slate-500 shadow-[inset_0_-1px_0_#e2e8f0]">
+                      <tr>
+                        <th className="px-4 py-3 font-medium">Type</th>
+                        <th className="px-4 py-3 font-medium">Name</th>
+                        <th className="px-4 py-3 font-medium">Duration</th>
+                        <th className="px-4 py-3 font-medium">Calories</th>
+                        <th className="px-4 py-3 font-medium">Logged At</th>
+                        <th className="px-4 py-3 font-medium">Notes</th>
+                        <th className="px-4 py-3 font-medium text-right">Row</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {batchRows.map((row) => (
+                        <tr key={row.clientId} className="border-t border-slate-100 align-top hover:bg-slate-50">
+                          <td className="px-4 py-3">
+                            <select
+                              value={row.type}
+                              onChange={(event) => updateBatchRow(row.clientId, 'type', event.target.value)}
+                              className="w-28 rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400"
+                            >
+                              {workoutTypes.map((type) => (
+                                <option key={type} value={type}>
+                                  {type}
+                                </option>
+                              ))}
+                            </select>
+                          </td>
+                          <td className="px-4 py-3">
+                            <input
+                              value={row.name}
+                              onChange={(event) => updateBatchRow(row.clientId, 'name', event.target.value)}
+                              className="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400"
+                            />
+                          </td>
+                          <td className="px-4 py-3">
+                            <input
+                              type="number"
+                              value={row.duration}
+                              onChange={(event) => updateBatchRow(row.clientId, 'duration', event.target.value)}
+                              className="w-24 rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400"
+                            />
+                          </td>
+                          <td className="px-4 py-3">
+                            <input
+                              type="number"
+                              value={row.calories}
+                              onChange={(event) => updateBatchRow(row.clientId, 'calories', event.target.value)}
+                              className="w-28 rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400"
+                            />
+                          </td>
+                          <td className="px-4 py-3">
+                            <input
+                              type="datetime-local"
+                              value={row.createdAt}
+                              onChange={(event) => updateBatchRow(row.clientId, 'createdAt', event.target.value)}
+                              className="w-52 rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400"
+                            />
+                          </td>
+                          <td className="px-4 py-3">
+                            <textarea
+                              value={row.notes}
+                              onChange={(event) => updateBatchRow(row.clientId, 'notes', event.target.value)}
+                              rows={1}
+                              className="w-full rounded-lg border border-slate-200 px-3 py-2 outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400"
+                            />
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <Button type="button" variant="ghost" size="sm" onClick={() => removeBatchRow(row.clientId)} className="cursor-pointer text-slate-500 hover:text-slate-900">
+                              Remove
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="border-t border-slate-100 bg-slate-50 px-6 py-4">
             <Button type="button" variant="outline" onClick={() => setBatchOpen(false)} className="cursor-pointer rounded-lg">
               Cancel
             </Button>
-            <Button type="button" onClick={() => void saveBatchChanges()} disabled={batchSaving} className="cursor-pointer rounded-lg">
+            <Button type="button" onClick={() => void saveBatchChanges()} disabled={batchSaving || (batchRows.length === 0 && batchDeletedIds.length === 0)} className="cursor-pointer rounded-lg">
               {batchSaving ? 'Saving...' : 'Save Changes'}
             </Button>
           </DialogFooter>

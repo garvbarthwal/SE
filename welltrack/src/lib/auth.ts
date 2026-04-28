@@ -2,7 +2,6 @@ import NextAuth, { DefaultSession } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
 import GitHubProvider from 'next-auth/providers/github'
-import { PrismaAdapter } from '@auth/prisma-adapter'
 import { prisma } from './prisma'
 import { compare } from 'bcryptjs'
 
@@ -15,7 +14,6 @@ declare module 'next-auth' {
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -70,10 +68,39 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: '/login',
   },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
+    async signIn({ user, account }) {
+      if (account?.provider !== 'credentials' && !user.email) {
+        return false
+      }
+
+      return true
+    },
+    async jwt({ token, user, account }) {
+      if (account?.provider === 'credentials' && user) {
         token.id = user.id
       }
+
+      if (account && account.provider !== 'credentials') {
+        const email = token.email ?? user?.email
+
+        if (email) {
+          const dbUser = await prisma.user.upsert({
+            where: { email },
+            update: {
+              name: token.name ?? user?.name,
+              image: token.picture ?? user?.image,
+            },
+            create: {
+              email,
+              name: token.name ?? user?.name,
+              image: token.picture ?? user?.image,
+            },
+          })
+
+          token.id = dbUser.id
+        }
+      }
+
       return token
     },
     async session({ session, token }) {
